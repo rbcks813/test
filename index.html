@@ -2,115 +2,151 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* 1. 제공된 style.css의 폰트 및 변수 이식 */
         @font-face {
             font-family: 'Paperozi';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2') format('woff2');
-            font-weight: 800; font-display: swap;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+            font-weight: 400; font-display: swap;
         }
         @font-face {
             font-family: 'Paperozi';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2') format('woff2');
-            font-weight: 600; font-display: swap;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2') format('woff2');
+            font-weight: 700; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Paperozi';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-9Black.woff2') format('woff2');
+            font-weight: 900; font-display: swap;
+        }
+
+        :root {
+            --amber-200: #f2d04b;
+            --amber-500: #d9a52e;
+            --gray-100: #f5f5f5;
+            --gray-400: #a3a3a3;
+            --gray-900: #1a1a1a;
         }
 
         body {
             margin: 0; padding: 0;
-            display: flex; align-items: center; justify-content: center;
-            background: transparent; overflow: hidden;
+            background: transparent;
             font-family: 'Paperozi', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
         }
 
-        /* 🛡️ 레이아웃 붕괴 방지 시스템 v2.0 적용 */
+        /* 2. 테스트.html의 구조 그대로 이식 */
         #am-root {
-            all: initial; box-sizing: border-box; font-family: 'Paperozi', sans-serif;
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; width: 100%; padding: 20px; gap: 20px;
-        }
-        #am-root * { box-sizing: border-box; transition: all 0.25s ease; }
-
-        /* 메인 헤더 (스크린샷 재현) */
-        .header-bar {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; max-width: 480px; height: 72px;
-            background: #F2D04B; border-radius: 40px;
-            font-size: 32px; font-weight: 800; color: #333;
-            position: relative; flex-shrink: 0;
-        }
-        .header-bar::before, .header-bar::after {
-            content: ''; width: 12px; height: 12px; background: #FFF;
-            border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);
-        }
-        .header-bar::before { left: 30px; }
-        .header-bar::after { right: 30px; }
-
-        /* 버튼 컨테이너 */
-        .container {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; max-width: 480px; gap: 15px; flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 0;
+            width: 100%;
         }
 
-        /* 기본 버튼 스타일 */
-        .btn {
-            display: flex; align-items: center; justify-content: center;
-            height: 64px; border-radius: 24px; font-size: 20px; font-weight: 800;
-            background: #FFF; border: 3px solid #E6E6E6; color: #999;
-            flex: 1; flex-shrink: 0; gap: 8px; cursor: default;
+        .statusTitlePill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 24px;
+            background: var(--amber-200);
+            border-radius: 100px;
         }
 
-        /* 활성화: 실시간 연락 가능 (Amber) */
-        .btn.active-true {
-            background: #D9A52E !important; border-color: #D9A52E !important; color: #333 !important;
-            box-shadow: 0 4px 12px rgba(217,165,46,0.3);
-        }
-        .btn.active-true::before {
-            content: ''; width: 10px; height: 10px; background: #F2D04B; border-radius: 50%;
+        .statusTitlePill .dot {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
         }
 
-        /* 활성화: 휴식 중 (Dark) */
-        .btn.active-false {
-            background: #444 !important; border-color: #444 !important; color: #FFF !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .statusTitlePill .titleText {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gray-900);
+            line-height: 1;
         }
 
-        .btn:hover { transform: translateY(-4px); }
+        .statusOptions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .statusOption {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 24px;
+            height: 56px;
+            border-radius: 16px;
+            background: #fff;
+            border: 2px solid var(--gray-100);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-400);
+            transition: all .2s ease;
+            cursor: default;
+        }
+
+        /* 활성화 상태 디자인 (제공된 CSS) */
+        .statusOption.activeOn {
+            background: var(--amber-500) !important;
+            border-color: var(--amber-500) !important;
+            color: var(--gray-900) !important;
+        }
+
+        .statusOption.activeOff {
+            background: var(--gray-900) !important;
+            border-color: var(--gray-900) !important;
+            color: #fff !important;
+        }
+
+        .statusOption:hover {
+            transform: translateY(-4px);
+        }
     </style>
 </head>
 <body>
 
-<div id="am-root">
-    <div class="header-bar">지금 연락 가능한가요?</div>
-    <div class="container">
-        <div id="am-on" class="btn">실시간 연락 가능</div>
-        <div id="am-off" class="btn">휴식 중</div>
+<section id="am-root">
+    <div class="statusTitlePill">
+        <span class="dot"></span>
+        <span class="titleText">지금 연락 가능한가요?</span>
+        <span class="dot"></span>
     </div>
-</div>
+    <div class="statusOptions">
+        <div id="statusOn" class="statusOption">실시간 연락 가능</div>
+        <div id="statusOff" class="statusOption">휴식 중</div>
+    </div>
+</section>
 
 <script>
-    const URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSqXRrOMJ0yWGc2CFwdpe-MeAeStLoAYYSQiczW1rZRuOrzYDWZiN0DnHpiRIDIwXse9ykzlfNcB-tS/pub?output=csv';
-    
-    async function sync() {
-        try {
-            const res = await fetch(URL);
-            const csv = await res.text();
-            // B1 셀 데이터 추출 (TRUE/FALSE)
-            const status = csv.split(',')[1].replace(/"/g, '').trim().toUpperCase();
-            
-            const on = document.getElementById('am-on');
-            const off = document.getElementById('am-off');
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSqXRrOMJ0yWGc2CFwdpe-MeAeStLoAYYSQiczW1rZRuOrzYDWZiN0DnHpiRIDIwXse9ykzlfNcB-tS/pub?output=csv';
 
-            if (status === 'TRUE') {
-                on.className = 'btn active-true';
-                off.className = 'btn';
+    async function update() {
+        try {
+            const res = await fetch(CSV_URL);
+            const text = await res.text();
+            const isOpen = text.split(',')[1].toUpperCase().includes('TRUE');
+
+            const onBtn = document.getElementById('statusOn');
+            const offBtn = document.getElementById('statusOff');
+
+            if (isOpen) {
+                onBtn.classList.add('activeOn');
+                offBtn.classList.remove('activeOff');
             } else {
-                off.className = 'btn active-false';
-                on.className = 'btn';
+                offBtn.classList.add('activeOff');
+                onBtn.classList.remove('activeOn');
             }
-        } catch(e) { console.log('Sync Fail'); }
+        } catch (e) { console.error('Status Sync Error'); }
     }
 
-    sync();
-    setInterval(sync, 15000);
+    update();
+    setInterval(update, 15000);
 </script>
 
 </body>
