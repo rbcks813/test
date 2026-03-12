@@ -2,18 +2,16 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Widget</title>
     <style>
-        @font-face {
-            font-family: 'Paperozi';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
-            font-weight: 400; font-display: swap;
-        }
         @font-face {
             font-family: 'Paperozi';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2') format('woff2');
             font-weight: 800; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Paperozi';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2') format('woff2');
+            font-weight: 600; font-display: swap;
         }
 
         body {
@@ -23,95 +21,96 @@
             font-family: 'Paperozi', sans-serif;
         }
 
-        #am-status-root {
-            all: initial;
-            box-sizing: border-box;
-            font-family: 'Paperozi', sans-serif;
+        /* 🛡️ 레이아웃 붕괴 방지 시스템 v2.0 적용 */
+        #am-root {
+            all: initial; box-sizing: border-box; font-family: 'Paperozi', sans-serif;
             display: flex; align-items: center; justify-content: center;
-            flex-direction: column;
-            width: 100%; padding: 20px; gap: 12px;
-            letter-spacing: -0.5px;
+            flex-direction: column; width: 100%; padding: 20px; gap: 20px;
         }
+        #am-root * { box-sizing: border-box; transition: all 0.25s ease; }
 
-        #am-status-root * { box-sizing: border-box; transition: all 0.25s ease; }
-
+        /* 메인 헤더 (스크린샷 재현) */
         .header-bar {
             display: flex; align-items: center; justify-content: center;
-            width: 100%; max-width: 340px; height: 50px;
-            background: #FFD64F; border-radius: 50px;
-            font-size: 18px; font-weight: 800; color: #333;
-            box-shadow: 0 6px 0 #e6c147; flex-shrink: 0;
+            width: 100%; max-width: 480px; height: 72px;
+            background: #F2D04B; border-radius: 40px;
+            font-size: 32px; font-weight: 800; color: #333;
+            position: relative; flex-shrink: 0;
         }
+        .header-bar::before, .header-bar::after {
+            content: ''; width: 12px; height: 12px; background: #FFF;
+            border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);
+        }
+        .header-bar::before { left: 30px; }
+        .header-bar::after { right: 30px; }
 
+        /* 버튼 컨테이너 */
         .container {
             display: flex; align-items: center; justify-content: center;
-            width: 100%; max-width: 340px; gap: 10px;
+            width: 100%; max-width: 480px; gap: 15px; flex-shrink: 0;
         }
 
-        .status-box {
+        /* 기본 버튼 스타일 */
+        .btn {
             display: flex; align-items: center; justify-content: center;
-            flex: 1; height: 56px !important;
-            border-radius: 20px; background: #f5f5f5;
-            color: #ccc; font-weight: 700; font-size: 15px;
-            border: 3px solid #eee; flex-shrink: 0;
-            cursor: default; text-align: center;
+            height: 64px; border-radius: 24px; font-size: 20px; font-weight: 800;
+            background: #FFF; border: 3px solid #E6E6E6; color: #999;
+            flex: 1; flex-shrink: 0; gap: 8px; cursor: default;
         }
 
-        /* 활성화 상태 스타일 */
-        .status-box.active-on {
-            background: #FFD64F !important; color: #333 !important;
-            border-color: #FFD64F !important;
-            box-shadow: 0 8px 15px rgba(255,214,79,0.4);
-            transform: translateY(-2px); font-weight: 800;
+        /* 활성화: 실시간 연락 가능 (Amber) */
+        .btn.active-true {
+            background: #D9A52E !important; border-color: #D9A52E !important; color: #333 !important;
+            box-shadow: 0 4px 12px rgba(217,165,46,0.3);
+        }
+        .btn.active-true::before {
+            content: ''; width: 10px; height: 10px; background: #F2D04B; border-radius: 50%;
         }
 
-        .status-box.active-off {
-            background: #444 !important; color: #fff !important;
-            border-color: #444 !important;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-            transform: translateY(-2px); font-weight: 800;
+        /* 활성화: 휴식 중 (Dark) */
+        .btn.active-false {
+            background: #444 !important; border-color: #444 !important; color: #FFF !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .status-box:hover { transform: translateY(-4px); }
+        .btn:hover { transform: translateY(-4px); }
     </style>
 </head>
 <body>
 
-<div id="am-status-root">
-    <div class="header-bar">지금 연락 가능한가요? 🎈</div>
+<div id="am-root">
+    <div class="header-bar">지금 연락 가능한가요?</div>
     <div class="container">
-        <div id="am-on" class="status-box">실시간 연락 가능 🟢</div>
-        <div id="am-off" class="status-box">휴식 중 💤</div>
+        <div id="am-on" class="btn">실시간 연락 가능</div>
+        <div id="am-off" class="btn">휴식 중</div>
     </div>
 </div>
 
 <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSqXRrOMJ0yWGc2CFwdpe-MeAeStLoAYYSQiczW1rZRuOrzYDWZiN0DnHpiRIDIwXse9ykzlfNcB-tS/pub?output=csv';
-
-    async function updateStatus() {
+    const URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSqXRrOMJ0yWGc2CFwdpe-MeAeStLoAYYSQiczW1rZRuOrzYDWZiN0DnHpiRIDIwXse9ykzlfNcB-tS/pub?output=csv';
+    
+    async function sync() {
         try {
-            const response = await fetch(CSV_URL);
-            const data = await response.text();
-            // CSV의 두 번째 값(B1) 추출 및 불필요한 따옴표 제거
-            const statusValue = data.split(',')[1].replace(/"/g, '').trim().toUpperCase();
+            const res = await fetch(URL);
+            const csv = await res.text();
+            // B1 셀 데이터 추출 (TRUE/FALSE)
+            const status = csv.split(',')[1].replace(/"/g, '').trim().toUpperCase();
             
-            const onBox = document.getElementById('am-on');
-            const offBox = document.getElementById('am-off');
+            const on = document.getElementById('am-on');
+            const off = document.getElementById('am-off');
 
-            if (statusValue === 'TRUE') {
-                onBox.classList.add('active-on');
-                offBox.classList.remove('active-off');
+            if (status === 'TRUE') {
+                on.className = 'btn active-true';
+                off.className = 'btn';
             } else {
-                offBox.classList.add('active-off');
-                onBox.classList.remove('active-on');
+                off.className = 'btn active-false';
+                on.className = 'btn';
             }
-        } catch (e) {
-            console.error('Status check failed');
-        }
+        } catch(e) { console.log('Sync Fail'); }
     }
 
-    updateStatus();
-    setInterval(updateStatus, 15000); // 15초마다 갱신
+    sync();
+    setInterval(sync, 15000);
 </script>
 
 </body>
