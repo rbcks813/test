@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* 1. 제공된 style.css의 폰트 및 변수 이식 */
+        /* 1. 폰트 로드 */
         @font-face {
             font-family: 'Paperozi';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
@@ -33,11 +33,10 @@
             margin: 0; padding: 0;
             background: transparent;
             font-family: 'Paperozi', sans-serif;
-            display: flex; justify-content: center; align-items: center;
+            display: flex; justify-content: center; align-items: flex-start;
             overflow: hidden;
         }
 
-        /* 2. 테스트.html의 구조 그대로 이식 */
         #am-root {
             display: flex;
             flex-direction: column;
@@ -47,66 +46,123 @@
             width: 100%;
         }
 
+        /* [상단 바] 큼직하고 안정적인 디자인 유지 */
         .statusTitlePill {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             padding: 10px 24px;
             background: var(--amber-200);
             border-radius: 100px;
+            flex-shrink: 0;
         }
 
         .statusTitlePill .dot {
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
+            width: 8px; height: 8px;
+            background: #fff; border-radius: 50%;
         }
 
         .statusTitlePill .titleText {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--gray-900);
-            line-height: 1;
+            font-size: 24px; font-weight: 900;
+            color: var(--gray-900); line-height: 1;
         }
 
+        /* [하단 영역] 버튼들이 중앙에 예쁘게 모이도록 정렬 */
         .statusOptions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .statusOption {
-            display: flex;
-            align-items: center;
+            display: flex; 
+            gap: 10px; 
             justify-content: center;
-            padding: 0 24px;
-            height: 56px;
-            border-radius: 16px;
-            background: #fff;
-            border: 2px solid var(--gray-100);
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--gray-400);
-            transition: all .2s ease;
-            cursor: default;
+            align-items: center;
         }
 
-        /* 활성화 상태 디자인 (제공된 CSS) */
+        /* [버튼 자동 리사이징 시스템]
+           width를 주지 않고 padding과 gap으로 내용물에 맞게 스스로 크기를 결정합니다. */
+        .statusOption {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 6px; /* 아이콘과 텍스트 사이의 완벽한 간격 */
+            height: 40px; 
+            padding: 0 16px; /* 내용물 양옆 여백 */
+            border-radius: 12px;
+            background: #fff; 
+            border: 2px solid var(--gray-100);
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--gray-400);
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: default; 
+            white-space: nowrap;
+        }
+
+        /* [활성화 상태] 텍스트가 굵어지고 색상이 칠해짐 */
         .statusOption.activeOn {
             background: var(--amber-500) !important;
             border-color: var(--amber-500) !important;
-            color: var(--gray-900) !important;
+            color: #fff !important;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(217, 165, 46, 0.3);
+            padding: 0 20px; /* 활성화 시 살짝 더 넓어지는 여유감 */
         }
 
         .statusOption.activeOff {
             background: var(--gray-900) !important;
             border-color: var(--gray-900) !important;
             color: #fff !important;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 0 20px;
         }
 
-        .statusOption:hover {
-            transform: translateY(-4px);
+        /* 🟢 전화기 아이콘 컨테이너 (Auto-fit의 핵심)
+           활성화되면 flex로 켜지면서 버튼 가로 길이를 자연스럽게 밀어냅니다. */
+        .phone-icon-container {
+            display: none; /* 비활성 시 완전히 사라져 텍스트 크기만 남음 */
+            align-items: center; 
+            justify-content: center;
+            width: 14px; height: 14px;
         }
+        .activeOn .phone-icon-container { display: flex; }
+        
+        .phone-icon {
+            width: 14px; height: 14px;
+            fill: #fff;
+            animation: ring 0.6s infinite ease-in-out;
+        }
+
+        @keyframes ring {
+            0% { transform: rotate(0); }
+            15% { transform: rotate(-15deg); }
+            30% { transform: rotate(15deg); }
+            45% { transform: rotate(-10deg); }
+            60% { transform: rotate(10deg); }
+            100% { transform: rotate(0); }
+        }
+
+        /* 💤 Zzz 아이콘 컨테이너 */
+        .zzz-container {
+            display: none; /* 비활성 시 완전히 사라짐 */
+            position: relative;
+            width: 14px; height: 14px;
+        }
+        .activeOff .zzz-container { display: flex; }
+        
+        .zzz-container span {
+            position: absolute; font-size: 10px; font-weight: 900; color: #fff;
+            opacity: 0; animation: zzz 2s infinite;
+        }
+        .zzz-container span:nth-child(2) { animation-delay: 0.6s; left: 2px; }
+        .zzz-container span:nth-child(3) { animation-delay: 1.2s; left: 5px; }
+        
+        @keyframes zzz {
+            0% { transform: translate(0, 0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(6px, -12px); opacity: 0; }
+        }
+
+        /* 버튼 호버 시 살짝 떠오르는 생동감 */
+        .statusOption:hover { transform: translateY(-3px); }
     </style>
 </head>
 <body>
@@ -117,9 +173,23 @@
         <span class="titleText">지금 연락 가능한가요?</span>
         <span class="dot"></span>
     </div>
+    
     <div class="statusOptions">
-        <div id="statusOn" class="statusOption">실시간 연락 가능</div>
-        <div id="statusOff" class="statusOption">휴식 중</div>
+        <div id="statusOn" class="statusOption">
+            <div class="phone-icon-container">
+                <svg class="phone-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 1.23 0 2.44.2 3.57.57.35.12.75.03 1.02-.24l2.2-2.2z"/>
+                </svg>
+            </div>
+            <span>실시간 연락 가능</span>
+        </div>
+        
+        <div id="statusOff" class="statusOption">
+            <div class="zzz-container">
+                <span>z</span><span>z</span><span>z</span>
+            </div>
+            <span>휴식 중</span>
+        </div>
     </div>
 </section>
 
