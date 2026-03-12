@@ -46,7 +46,7 @@
             width: 100%;
         }
 
-        /* [상단 바] 큼직하고 안정적인 디자인 유지 */
+        /* [상단 바] 큼직한 디자인 유지 */
         .statusTitlePill {
             display: flex;
             align-items: center;
@@ -76,58 +76,52 @@
             align-items: center;
         }
 
-        /* [버튼 자동 리사이징 시스템]
-           width를 주지 않고 padding과 gap으로 내용물에 맞게 스스로 크기를 결정합니다. */
+        /* [버튼 자동 리사이징] */
         .statusOption {
             display: flex; 
             align-items: center; 
             justify-content: center;
-            gap: 6px; /* 아이콘과 텍스트 사이의 완벽한 간격 */
+            gap: 6px; 
             height: 40px; 
-            padding: 0 16px; /* 내용물 양옆 여백 */
+            padding: 0 16px; 
             border-radius: 12px;
             background: #fff; 
             border: 2px solid var(--gray-100);
             font-size: 13px; 
             font-weight: 700; 
             color: var(--gray-400);
-            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: default; 
             white-space: nowrap;
         }
 
-        /* [활성화 상태] 텍스트가 굵어지고 색상이 칠해짐 */
-        .statusOption.activeOn {
-            background: var(--amber-500) !important;
-            border-color: var(--amber-500) !important;
+        /* 활성화 시 공통 스타일 */
+        .statusOption.activeOn, .statusOption.activeOff {
             color: #fff !important;
             font-weight: 900;
+            padding: 0 20px;
+            border-width: 0;
+        }
+
+        .statusOption.activeOn {
+            background: var(--amber-500) !important;
             box-shadow: 0 4px 12px rgba(217, 165, 46, 0.3);
-            padding: 0 20px; /* 활성화 시 살짝 더 넓어지는 여유감 */
         }
 
         .statusOption.activeOff {
             background: var(--gray-900) !important;
-            border-color: var(--gray-900) !important;
-            color: #fff !important;
-            font-weight: 900;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            padding: 0 20px;
         }
 
-        /* 🟢 전화기 아이콘 컨테이너 (Auto-fit의 핵심)
-           활성화되면 flex로 켜지면서 버튼 가로 길이를 자연스럽게 밀어냅니다. */
+        /* 🟢 전화기 아이콘 */
         .phone-icon-container {
-            display: none; /* 비활성 시 완전히 사라져 텍스트 크기만 남음 */
-            align-items: center; 
-            justify-content: center;
+            display: none;
+            align-items: center; justify-content: center;
             width: 14px; height: 14px;
         }
         .activeOn .phone-icon-container { display: flex; }
-        
         .phone-icon {
-            width: 14px; height: 14px;
-            fill: #fff;
+            width: 14px; height: 14px; fill: #fff;
             animation: ring 0.6s infinite ease-in-out;
         }
 
@@ -140,14 +134,13 @@
             100% { transform: rotate(0); }
         }
 
-        /* 💤 Zzz 아이콘 컨테이너 */
+        /* 💤 Zzz 아이콘 */
         .zzz-container {
-            display: none; /* 비활성 시 완전히 사라짐 */
+            display: none;
             position: relative;
             width: 14px; height: 14px;
         }
         .activeOff .zzz-container { display: flex; }
-        
         .zzz-container span {
             position: absolute; font-size: 10px; font-weight: 900; color: #fff;
             opacity: 0; animation: zzz 2s infinite;
@@ -161,7 +154,6 @@
             100% { transform: translate(6px, -12px); opacity: 0; }
         }
 
-        /* 버튼 호버 시 살짝 떠오르는 생동감 */
         .statusOption:hover { transform: translateY(-3px); }
     </style>
 </head>
@@ -198,23 +190,29 @@
 
     async function update() {
         try {
-            const res = await fetch(CSV_URL);
-            const text = await res.text();
-            const isOpen = text.split(',')[1].toUpperCase().includes('TRUE');
+            // [캐시 방지] URL 뒤에 매번 다른 시간값을 붙여 새로운 데이터를 강제로 호출합니다.
+            const response = await fetch(`${CSV_URL}&t=${Date.now()}`);
+            const text = await response.text();
+            const upperText = text.toUpperCase();
 
             const onBtn = document.getElementById('statusOn');
             const offBtn = document.getElementById('statusOff');
 
-            if (isOpen) {
+            // [안전 장치] 데이터에 TRUE나 FALSE가 명확히 들어있을 때만 변경합니다.
+            // 데이터 로딩에 실패하거나 엉뚱한 값이 오면 상태를 바꾸지 않고 그대로 유지합니다.
+            if (upperText.includes('TRUE')) {
                 onBtn.classList.add('activeOn');
                 offBtn.classList.remove('activeOff');
-            } else {
+            } else if (upperText.includes('FALSE')) {
                 offBtn.classList.add('activeOff');
                 onBtn.classList.remove('activeOn');
             }
-        } catch (e) { console.error('Status Sync Error'); }
+        } catch (e) {
+            console.warn('네트워크 일시적 오류 - 이전 상태 유지');
+        }
     }
 
+    // 15초마다 갱신
     update();
     setInterval(update, 15000);
 </script>
