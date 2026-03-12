@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Widget</title>
+    <style>
+        @font-face {
+            font-family: 'Paperozi';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+            font-weight: 400; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Paperozi';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2') format('woff2');
+            font-weight: 800; font-display: swap;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; overflow: hidden;
+            font-family: 'Paperozi', sans-serif;
+        }
+
+        #am-status-root {
+            all: initial;
+            box-sizing: border-box;
+            font-family: 'Paperozi', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+            width: 100%; padding: 20px; gap: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        #am-status-root * { box-sizing: border-box; transition: all 0.25s ease; }
+
+        .header-bar {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; max-width: 340px; height: 50px;
+            background: #FFD64F; border-radius: 50px;
+            font-size: 18px; font-weight: 800; color: #333;
+            box-shadow: 0 6px 0 #e6c147; flex-shrink: 0;
+        }
+
+        .container {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; max-width: 340px; gap: 10px;
+        }
+
+        .status-box {
+            display: flex; align-items: center; justify-content: center;
+            flex: 1; height: 56px !important;
+            border-radius: 20px; background: #f5f5f5;
+            color: #ccc; font-weight: 700; font-size: 15px;
+            border: 3px solid #eee; flex-shrink: 0;
+            cursor: default; text-align: center;
+        }
+
+        /* 활성화 상태 스타일 */
+        .status-box.active-on {
+            background: #FFD64F !important; color: #333 !important;
+            border-color: #FFD64F !important;
+            box-shadow: 0 8px 15px rgba(255,214,79,0.4);
+            transform: translateY(-2px); font-weight: 800;
+        }
+
+        .status-box.active-off {
+            background: #444 !important; color: #fff !important;
+            border-color: #444 !important;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px); font-weight: 800;
+        }
+
+        .status-box:hover { transform: translateY(-4px); }
+    </style>
+</head>
+<body>
+
+<div id="am-status-root">
+    <div class="header-bar">지금 연락 가능한가요? 🎈</div>
+    <div class="container">
+        <div id="am-on" class="status-box">실시간 연락 가능 🟢</div>
+        <div id="am-off" class="status-box">휴식 중 💤</div>
+    </div>
+</div>
+
+<script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSqXRrOMJ0yWGc2CFwdpe-MeAeStLoAYYSQiczW1rZRuOrzYDWZiN0DnHpiRIDIwXse9ykzlfNcB-tS/pub?output=csv';
+
+    async function updateStatus() {
+        try {
+            const response = await fetch(CSV_URL);
+            const data = await response.text();
+            // CSV의 두 번째 값(B1) 추출 및 불필요한 따옴표 제거
+            const statusValue = data.split(',')[1].replace(/"/g, '').trim().toUpperCase();
+            
+            const onBox = document.getElementById('am-on');
+            const offBox = document.getElementById('am-off');
+
+            if (statusValue === 'TRUE') {
+                onBox.classList.add('active-on');
+                offBox.classList.remove('active-off');
+            } else {
+                offBox.classList.add('active-off');
+                onBox.classList.remove('active-on');
+            }
+        } catch (e) {
+            console.error('Status check failed');
+        }
+    }
+
+    updateStatus();
+    setInterval(updateStatus, 15000); // 15초마다 갱신
+</script>
+
+</body>
+</html>
